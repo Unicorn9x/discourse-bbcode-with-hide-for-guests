@@ -28,7 +28,7 @@ function setupMarkdownIt(md) {
       startToken.content = finishToken.content = "";
       
       // Check if user is logged in
-      if (typeof Discourse !== "undefined" && Discourse.User && User.current()) {
+      if (typeof Discourse !== "undefined" && User && User.current()) {
         startToken.attrs = [["class", "hide-for-guests"]];
       } else {
         // For guests, display a message instead of the content
