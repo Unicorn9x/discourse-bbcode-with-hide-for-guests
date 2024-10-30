@@ -28,7 +28,7 @@ function setupMarkdownIt(md) {
       startToken.content = finishToken.content = "";
       
       // Check if user is logged in
-      if (typeof Discourse !== "undefined" && User && User.current()) {
+      if (typeof Discourse !== "undefined" && Discourse.User && User.current()) {
         startToken.attrs = [["class", "hide-for-guests"]];
       } else {
         // For guests, display a message instead of the content
@@ -36,12 +36,6 @@ function setupMarkdownIt(md) {
         startToken.content = "This content is only visible to logged-in users.";
         finishToken.content = "";
       }
-      
-      startToken.type = "bbcode_open";
-      finishToken.type = "bbcode_close";
-      
-      startToken.nesting = 1;
-      finishToken.nesting = -1;
     }
   });
   
