@@ -1,4 +1,5 @@
 import I18n from "I18n";
+import User from "discourse/models/user";
 
 function wrap(tag, attr, callback) {
   return function (startToken, finishToken, tagInfo) {
@@ -27,7 +28,7 @@ function setupMarkdownIt(md) {
       startToken.content = finishToken.content = "";
       
       // Check if user is logged in
-      if (typeof Discourse !== "undefined" && Discourse.User && Discourse.User.current()) {
+      if (typeof Discourse !== "undefined" && User && User.current()) {
         startToken.attrs = [["class", "hide-for-guests"]];
       } else {
         // For guests, display a message instead of the content
