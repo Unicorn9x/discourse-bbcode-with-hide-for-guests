@@ -20,6 +20,30 @@ function wrap(tag, attr, callback) {
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
 
+  ruler.push("hide-for-guests", {
+    tag: "hide-for-guests",
+    wrap: function (startToken, finishToken, tagInfo) {
+      startToken.tag = finishToken.tag = "div";
+      startToken.content = finishToken.content = "";
+      
+      // Check if user is logged in
+      if (typeof Discourse !== "undefined" && Discourse.User && Discourse.User.current()) {
+        startToken.attrs = [["class", "hide-for-guests"]];
+      } else {
+        // For guests, display a message instead of the content
+        startToken.attrs = [["class", "hidden-content"]];
+        startToken.content = "This content is only visible to logged-in users.";
+        finishToken.content = "";
+      }
+      
+      startToken.type = "bbcode_open";
+      finishToken.type = "bbcode_close";
+      
+      startToken.nesting = 1;
+      finishToken.nesting = -1;
+    }
+  });
+  
   ruler.push("size", {
     tag: "size",
 
