@@ -37,7 +37,7 @@ function setupMarkdownIt(md) {
         finishToken.content = "";
       }
     }
-  });
+  };
   
   ruler.push("size", {
     tag: "size",
