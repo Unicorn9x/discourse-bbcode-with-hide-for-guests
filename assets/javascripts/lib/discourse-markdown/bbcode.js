@@ -23,21 +23,29 @@ function setupMarkdownIt(md) {
 
   ruler.push("hide-for-guests", {
     tag: "hide-for-guests",
-    wrap: function (startToken, finishToken, tagInfo) {
+    wrap: function (startToken, finishToken) {
       startToken.tag = finishToken.tag = "div";
       startToken.content = finishToken.content = "";
       
-      // Check if user is logged in
-      if (typeof Discourse !== "undefined" && User && User.current()) {
-        startToken.attrs = [["class", "hide-for-guests"]];
-      } else {
-        // For guests, display a message instead of the content
-        startToken.attrs = [["class", "hidden-content"]];
-        startToken.content = "This content is only visible to logged-in users.";
-        finishToken.content = "";
-      }
+    // Use User.current() to check if a user is logged in
+    const isLoggedIn = typeof Discourse !== "undefined" && User && User.current();
+    
+    if (isLoggedIn) {
+      // For logged-in users, display the content with the class 'hide-for-guests'
+      startToken.attrs = [["class", "hide-for-guests"]];
+    } else {
+      // For guests, show a placeholder message and hide the original content
+      startToken.attrs = [["class", "hidden-content"]];
+      startToken.content = "This content is only visible to logged-in users.";
+      finishToken.content = "";  // Clear the ending token's content
     }
-  };
+
+    startToken.type = "bbcode_open";
+    finishToken.type = "bbcode_close";
+    startToken.nesting = 1;
+    finishToken.nesting = -1;
+  }
+});
   
   ruler.push("size", {
     tag: "size",
