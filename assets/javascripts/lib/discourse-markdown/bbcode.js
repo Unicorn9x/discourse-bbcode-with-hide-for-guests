@@ -1,4 +1,5 @@
 import I18n from "I18n";
+import User from "discourse/models/user";
 
 function wrap(tag, attr, callback) {
   return function (startToken, finishToken, tagInfo) {
@@ -19,7 +20,36 @@ function wrap(tag, attr, callback) {
 
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
+
+  ruler.push('hide-for-guests', {
+    tag: 'hide-for-guests',
+    wrap: function (startToken, endToken, tagInfo, content) {
+      // Check if the user is logged in
+      const isLoggedIn = typeof Discourse !== "undefined" && User && User.current();
   
+      if (isLoggedIn) {
+        // If logged in, render the content normally
+        startToken.type = 'div_open';
+        startToken.tag = 'div';
+        startToken.attrs = [['class', 'hide-for-guests']];
+        startToken.content = '';
+        startToken.nesting = 1;
+  
+        endToken.type = 'div_close';
+        endToken.tag = 'div';
+        endToken.content = '';
+        endToken.nesting = -1;
+      } else {
+        // If not logged in, display a message instead of the original content
+        startToken.type = 'html_inline';
+        startToken.content = '<div class="hidden-content">This content is only visible to logged-in users.</div>';
+        endToken.content = ''; // Clear endToken content to prevent closing tag issues
+      }
+  
+      return false;
+    }
+  });
+
   ruler.push("size", {
     tag: "size",
 
