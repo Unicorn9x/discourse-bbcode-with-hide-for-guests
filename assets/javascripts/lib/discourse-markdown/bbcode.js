@@ -227,6 +227,7 @@ export function setup(helper) {
     "span.smallfont",
     "blockquote.indent",
     "ol[type=*]",
+    "div.hide-for-guests",
   ]);
 
   helper.allowList({
