@@ -21,26 +21,14 @@ function wrap(tag, attr, callback) {
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
 
-// Register hide-for-guests rule with markdown-it
-  md.use(function (md) {
-    md.renderer.rules.hide_for_guests = function (tokens, idx, options, env, self) {
-      const isLoggedIn = User.current() !== null;
-      const token = tokens[idx];
-  
-      if (isLoggedIn) {
-        // Render original content if logged in
-        return self.renderToken(tokens, idx, options);
-      } else {
-        // Replace with guest message if not logged in
-        return '<div class="hidden-content">This content is only visible to logged-in users.</div>';
-      }
-    };
-  });
-  
-  // Register [hide-for-guests] as a BBCode tag
-  md.inline.bbcode.ruler.push("hide-for-guests", {
-    tag: "hide-for-guests",
-    wrap: true
+  md.inline.bbcode.ruler.push('hfg', {
+    tag: 'hfg',
+    wrap: function (startToken, endToken) {
+      startToken.tag = endToken.tag = 'div';
+      startToken.attrs = [['class', 'hfg']];
+      startToken.nesting = 1;
+      endToken.nesting = -1;
+    }
   });
 
   ruler.push("size", {
