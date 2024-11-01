@@ -21,7 +21,7 @@ function wrap(tag, attr, callback) {
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
 
-  ruler.push('hide-for-guests', {
+  md.block.bbcode.ruler.push('hide-for-guests', {
     tag: 'hide-for-guests',
     wrap: function (startToken, endToken, tagInfo, content) {
       // Check if the user is logged in
