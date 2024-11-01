@@ -21,34 +21,19 @@ function wrap(tag, attr, callback) {
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
 
-  md.block.bbcode.ruler.push('hide-for-guests', {
-    tag: 'hide-for-guests',
-    wrap: function (startToken, endToken, tagInfo, content) {
-      // Check if the user is logged in
-      const isLoggedIn = typeof Discourse !== "undefined" && User && User.current();
-  
-      if (isLoggedIn) {
-        // If logged in, render the content normally
-        startToken.type = 'div_open';
-        startToken.tag = 'div';
-        startToken.attrs = [['class', 'hide-for-guests']];
-        startToken.content = '';
-        startToken.nesting = 1;
-  
-        endToken.type = 'div_close';
-        endToken.tag = 'div';
-        endToken.content = '';
-        endToken.nesting = -1;
-      } else {
-        // If not logged in, display a message instead of the original content
-        startToken.type = 'html_inline';
-        startToken.content = '<div class="hidden-content">This content is only visible to logged-in users.</div>';
-        endToken.content = ''; // Clear endToken content to prevent closing tag issues
-      }
-  
-      return false;
+  md.core.ruler.push('hide-for-guests', function (state) {
+  const isLoggedIn = typeof Discourse !== "undefined" && User && User.current() !== null;
+
+  state.tokens.forEach((token, index) => {
+    if (token.type === 'bbcode_open' && token.tag === 'hide-for-guests') {
+      token.tag = isLoggedIn ? 'div' : 'span';
+      token.attrs = [['class', isLoggedIn ? 'show-for-users' : 'hide-for-guests']];
+      token.content = isLoggedIn ? token.content : "Content visible only to logged-in users.";
+      state.tokens[index + 1].tag = isLoggedIn ? 'div_close' : 'span_close';
     }
   });
+});
+
 
   ruler.push("size", {
     tag: "size",
