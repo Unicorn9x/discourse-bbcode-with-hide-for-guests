@@ -21,19 +21,27 @@ function wrap(tag, attr, callback) {
 function setupMarkdownIt(md) {
   const ruler = md.inline.bbcode.ruler;
 
-  md.core.ruler.push('hide-for-guests', function (state) {
-  const isLoggedIn = typeof Discourse !== "undefined" && User && User.current() !== null;
-
-  state.tokens.forEach((token, index) => {
-    if (token.type === 'bbcode_open' && token.tag === 'hide-for-guests') {
-      token.tag = isLoggedIn ? 'div' : 'span';
-      token.attrs = [['class', isLoggedIn ? 'show-for-users' : 'hide-for-guests']];
-      token.content = isLoggedIn ? token.content : "Content visible only to logged-in users.";
-      state.tokens[index + 1].tag = isLoggedIn ? 'div_close' : 'span_close';
-    }
+// Register hide-for-guests rule with markdown-it
+  md.use(function (md) {
+    md.renderer.rules.hide_for_guests = function (tokens, idx, options, env, self) {
+      const isLoggedIn = User.current() !== null;
+      const token = tokens[idx];
+  
+      if (isLoggedIn) {
+        // Render original content if logged in
+        return self.renderToken(tokens, idx, options);
+      } else {
+        // Replace with guest message if not logged in
+        return '<div class="hidden-content">This content is only visible to logged-in users.</div>';
+      }
+    };
   });
-});
-
+  
+  // Register [hide-for-guests] as a BBCode tag
+  md.inline.bbcode.ruler.push("hide-for-guests", {
+    tag: "hide-for-guests",
+    wrap: true
+  });
 
   ruler.push("size", {
     tag: "size",
